@@ -1,3 +1,3 @@
 # OMERO
 
-Test test test...
+Collection of scripts related to the OMERO Image database.
