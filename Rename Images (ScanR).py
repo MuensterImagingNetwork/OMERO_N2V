@@ -36,7 +36,7 @@ def rename_images(conn, script_params):
             position = str(re.findall(r"(?<=Position )([0-9]+)", image.name))[2:-2]
             print(f"Found well name {well} and position {position}")
             for name in origPathSet:
-                if well==name.split("--")[0] and position in name.split("--")[2]:
+                if well==name.split("--")[0] and position==re.findall(r"([1-9][0-9]*)",name.split("--")[2])[0]:
                     image.setName(str(name))
                     image.save()
                     print(f"Successfully saved new image: {name}")
