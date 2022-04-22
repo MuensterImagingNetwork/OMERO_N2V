@@ -1,3 +1,3 @@
 # OMERO
 
-Collection of scripts related to the OMERO Image database.
+Collection of functions related to the OMERO Image database.
