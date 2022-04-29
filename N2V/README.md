@@ -1,4 +1,4 @@
-# N2V
+# Noise2Void - Image Denoising
 
 Interactive GUI to train and apply the DeepLearningTool Noise2Void for image denoising on images stored in the OMERO database. 
 
