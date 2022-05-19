@@ -19,7 +19,7 @@ from omero.gateway import BlitzGateway
 import getpass
 
 sys.path.append("../ConvenienceFunctions")
-from Omero_Images import omero_images
+from Omero_Images import omero_images, config
 
 
 class GUI:
@@ -42,8 +42,8 @@ class GUI:
 
         # StringVars that can be inserted by User
         self.model_name = tk.StringVar(self.buttonframe, value="my_model")
-        self.train_epochs = tk.StringVar(self.buttonframe, value=100)
-        self.dataset_id = tk.StringVar(self.buttonframe, value="5569")
+        self.train_epochs = tk.StringVar(self.buttonframe, value=config['N2V']["n_epoch"])
+        self.dataset_id = tk.StringVar(self.buttonframe, value=config['N2V']["dataset_id"])
 
         #Selection box for image dimensions
         self.label6 = tk.Label(self.buttonframe, text="")
