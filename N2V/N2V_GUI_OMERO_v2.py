@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from n2v.models import N2VConfig, N2V
 from n2v.internals.N2V_DataGenerator import N2V_DataGenerator
 import os
+import sys
 from tkinter import filedialog, simpledialog
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import tensorflow as tf
@@ -17,6 +18,7 @@ import omero
 from omero.gateway import BlitzGateway
 import getpass
 
+sys.path.append("../ConvenienceFunctions")
 from Omero_Images import omero_images
 
 
