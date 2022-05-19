@@ -6,6 +6,8 @@ import getpass
 import tkinter as tk
 from tkinter import filedialog, simpledialog
 import numpy as np
+import configparser
+import os
 
 
 class omero_images:
@@ -18,16 +20,27 @@ class omero_images:
         """Opens GUI to collect login info."""
 
         pw_dialog = tk.Tk()
-        self.username = tk.StringVar(pw_dialog, value="username")
-        self.password = tk.StringVar(pw_dialog, value="password")
+        self.username = tk.StringVar(pw_dialog, value=config['OMERO']["username"])
+        self.password = tk.StringVar(pw_dialog, value="")
+        self.hostname = tk.StringVar(pw_dialog, value=config['OMERO']["hostname"])
+        self.port     = tk.StringVar(pw_dialog, value=config['OMERO']["port"])
         username_label = tk.Label(pw_dialog, text="Username").grid(row=0, padx=20, pady=10, sticky=tk.W)
         password_label = tk.Label(pw_dialog, text="Password").grid(row=1, padx=20, pady=10, sticky=tk.W)
+        hostname_label = tk.Label(pw_dialog, text="Hostname").grid(row=2, padx=20, pady=10, sticky=tk.W)
+        port_label     = tk.Label(pw_dialog, text="Port").grid(row=3, padx=20, pady=10, sticky=tk.W)
         username_entry = tk.Entry(pw_dialog, textvariable=self.username)
         password_entry = tk.Entry(pw_dialog, textvariable=self.password, show='*')
+        hostname_entry = tk.Entry(pw_dialog, textvariable=self.hostname, width=35)
+        port_entry     = tk.Entry(pw_dialog, textvariable=self.port, width=6)
         username_entry.grid(row=0, column=1, padx=20, pady=10, sticky=tk.W)
         password_entry.grid(row=1, column=1, padx=20, pady=10, sticky=tk.W)
+        hostname_entry.grid(row=2, column=1, padx=20, pady=10, sticky=tk.W)
+        port_entry.grid(row=3, column=1, padx=20, pady=10, sticky=tk.W)
+        config_button = tk.Button(pw_dialog, text="Save config", command=self.save_config)
+        config_button.grid(row=4, column=0, padx=20, pady=10)
         close_button = tk.Button(pw_dialog, text="Close", command=pw_dialog.destroy)
-        close_button.grid(row=2, columnspan=2, padx=20, pady=30)
+        close_button.grid(row=4, column=1, padx=20, pady=10)
+        
 
         pw_dialog.mainloop()
 
@@ -42,6 +55,8 @@ class omero_images:
         """
         username = self.username.get()
         password = self.password.get()
+        hostname = self.hostname.get()
+        port     = self.port.get()
 
         conn = BlitzGateway(username, password,
                             host=hostname, port=port, secure=True)
@@ -257,6 +272,26 @@ class omero_images:
             name = list_imagenames[i].split(".", )[0] + postfix
             conn.createImageFromNumpySeq(plane_gen(image_array[i]), name, image_array[i].shape[0],
                                          image_array[i].shape[1], image_array[i].shape[2], dataset=dataset)
+    
+    def save_config(self):
+        config['OMERO']["hostname"] = self.hostname.get()
+        config['OMERO']["username"] = self.username.get()
+        config['OMERO']["port"]     = self.port.get()
+        write_config()
 
+
+CONFIG_FPATH = '../config.ini'
+
+def write_config():
+    config.write(open(CONFIG_FPATH, 'w'))
+
+config = configparser.ConfigParser()
+if not os.path.exists(CONFIG_FPATH):
+    config['OMERO'] = {'hostname': 'omero-imaging.uni-muenster.de', 'username': '', "port":4064}
+    config['N2V'] =   {'n_epoch': '100', 'dataset_id':""}
+    write_config()
+else:
+    # Read File
+    config.read(CONFIG_FPATH)
 
 
