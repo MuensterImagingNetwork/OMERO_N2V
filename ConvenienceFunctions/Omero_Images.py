@@ -1,4 +1,5 @@
 # Omero-related imports
+from ctypes import alignment
 import omero
 from omero.gateway import BlitzGateway
 from omero.gateway import DatasetWrapper
@@ -36,12 +37,15 @@ class omero_images:
         password_entry.grid(row=1, column=1, padx=20, pady=10, sticky=tk.W)
         hostname_entry.grid(row=2, column=1, padx=20, pady=10, sticky=tk.W)
         port_entry.grid(row=3, column=1, padx=20, pady=10, sticky=tk.W)
-        config_button = tk.Button(pw_dialog, text="Save config", command=self.save_config)
-        config_button.grid(row=4, column=0, padx=20, pady=10)
-        close_button = tk.Button(pw_dialog, text="Close", command=pw_dialog.destroy)
-        close_button.grid(row=4, column=1, padx=20, pady=10)
-        
 
+        close_button = tk.Button(pw_dialog, text="OK", command=pw_dialog.destroy)
+        close_button.grid(row=4, column=0, padx=20, pady=10)
+
+        config_button = tk.Button(pw_dialog, text="save config", command=self.save_config)
+        config_button.place(x=265, y=174)
+
+        
+        
         pw_dialog.mainloop()
 
 
