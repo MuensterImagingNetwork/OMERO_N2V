@@ -159,7 +159,7 @@ class GUI:
         empty_image = np.zeros(image.shape)
         self.a.imshow(image, cmap='magma')
         self.canvas.draw()
-        self.b.imshow(empty_image, cmap='magma')
+        self.b.imshow(empty_image, cmap='magma', vmin=0, vmax=1)
         self.canvas.draw()
 
 
