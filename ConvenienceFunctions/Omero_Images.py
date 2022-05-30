@@ -20,6 +20,12 @@ class omero_images:
     def login_omero(self):
         """Opens GUI to collect login info."""
 
+        def destroy():
+            config['OMERO']["hostname"] = self.hostname.get()
+            config['OMERO']["username"] = self.username.get()
+            config['OMERO']["port"]     = self.port.get()
+            pw_dialog.destroy()
+
         pw_dialog = tk.Tk()
         self.username = tk.StringVar(pw_dialog, value=config['OMERO']["username"])
         self.password = tk.StringVar(pw_dialog, value="")
@@ -38,13 +44,11 @@ class omero_images:
         hostname_entry.grid(row=2, column=1, padx=20, pady=10, sticky=tk.W)
         port_entry.grid(row=3, column=1, padx=20, pady=10, sticky=tk.W)
 
-        close_button = tk.Button(pw_dialog, text="OK", command=pw_dialog.destroy)
+        close_button = tk.Button(pw_dialog, text="OK", command=destroy)
         close_button.grid(row=4, column=0, padx=20, pady=10)
 
         config_button = tk.Button(pw_dialog, text="save config", command=self.save_config)
-        config_button.place(x=265, y=174)
-
-        
+        config_button.place(x=265, y=174)        
         
         pw_dialog.mainloop()
 
