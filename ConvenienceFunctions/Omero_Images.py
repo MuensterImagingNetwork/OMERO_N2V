@@ -14,7 +14,7 @@ import os
 class omero_images:
 
     def __init__(self):
-        pass
+        self.password_val = ""
         #self.dataset_id = tk.StringVar(self.buttonframe, value="5569")
 
     def login_omero(self):
@@ -24,11 +24,12 @@ class omero_images:
             config['OMERO']["hostname"] = self.hostname.get()
             config['OMERO']["username"] = self.username.get()
             config['OMERO']["port"]     = self.port.get()
+            self.password_val           = self.password.get()
             pw_dialog.destroy()
 
         pw_dialog = tk.Tk()
         self.username = tk.StringVar(pw_dialog, value=config['OMERO']["username"])
-        self.password = tk.StringVar(pw_dialog, value="")
+        self.password = tk.StringVar(pw_dialog, value=self.password_val)
         self.hostname = tk.StringVar(pw_dialog, value=config['OMERO']["hostname"])
         self.port     = tk.StringVar(pw_dialog, value=config['OMERO']["port"])
         username_label = tk.Label(pw_dialog, text="Username").grid(row=0, padx=20, pady=10, sticky=tk.W)
