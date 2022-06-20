@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from n2v.models import N2VConfig, N2V
 from n2v.internals.N2V_DataGenerator import N2V_DataGenerator
 import os
+import sys
 from tkinter import filedialog, simpledialog
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import tensorflow as tf
@@ -17,7 +18,8 @@ import omero
 from omero.gateway import BlitzGateway
 import getpass
 
-from Omero_Images import omero_images
+sys.path.append("../ConvenienceFunctions")
+from Omero_Images import omero_images, config
 
 
 class GUI:
@@ -40,8 +42,15 @@ class GUI:
 
         # StringVars that can be inserted by User
         self.model_name = tk.StringVar(self.buttonframe, value="my_model")
-        self.train_epochs = tk.StringVar(self.buttonframe, value=100)
-        self.dataset_id = tk.StringVar(self.buttonframe, value="5569")
+        self.train_epochs = tk.StringVar(self.buttonframe, value=config['N2V']["n_epoch"])
+        self.train_batchsize = tk.StringVar(self.buttonframe, value=config['N2V']["batch_size"])
+        self.dataset_id = tk.StringVar(self.buttonframe, value=config['N2V']["dataset_id"])
+        patch_opt = list(2**np.arange(5,11)) # Gives patch size option in the powers of 2
+        patch_size = config['N2V']["patch_size"]
+        if int(patch_size) not in patch_opt:
+            print("Invalid patch size, setting to default 256x256")
+            patch_size = 256
+        self.train_patchsize = tk.StringVar(self.buttonframe, value=patch_size)
 
         #Selection box for image dimensions
         self.label6 = tk.Label(self.buttonframe, text="")
@@ -60,14 +69,20 @@ class GUI:
         # Training Buttons
         self.label1 = tk.Label(self.buttonframe, text="Save model as:").grid(row=2, column=1, columnspan=2, padx=10, pady=10, sticky=tk.E)
         self.insert_model_name = tk.Entry(self.buttonframe, textvariable=self.model_name).grid(row=2, column=3, padx=10, pady=10, sticky=tk.W)
-        self.label2 = tk.Label(self.buttonframe, text="Number of training epochs").grid(row=3, column=1, columnspan=2, padx=10, pady=10, sticky=tk.E)
-        self.insert_train_epochs = tk.Entry(self.buttonframe, textvariable=self.train_epochs).grid(row=3, column=3, padx=10, pady=10, sticky=tk.W)
+
+        self.label5 = tk.Label(self.buttonframe, text="Patch size").grid(row=3, column=1, columnspan=2, padx=10, pady=10, sticky=tk.E)
+        self.patchsize_dropdown = tk.OptionMenu(self.buttonframe, self.train_patchsize, *patch_opt).grid(row=3, column=3, padx=10, pady=10, sticky=tk.W)
+        
+        self.label2 = tk.Label(self.buttonframe, text="Number of training epochs").grid(row=4, column=1, columnspan=2, padx=10, pady=10, sticky=tk.E)
+        self.insert_train_epochs = tk.Entry(self.buttonframe, textvariable=self.train_epochs).grid(row=4, column=3, padx=10, pady=10, sticky=tk.W)
+        self.label3 = tk.Label(self.buttonframe, text="Batch size").grid(row=5, column=1, columnspan=2, padx=10, pady=10, sticky=tk.E)
+        self.insert_train_batchsize = tk.Entry(self.buttonframe, textvariable=self.train_batchsize).grid(row=5, column=3, padx=10, pady=10, sticky=tk.W)
         self.start_training = tk.Button(self.buttonframe, text="Start training", command=self.start_training)
-        self.start_training.grid(row=5, column=1, padx=30, pady=10, sticky=tk.E)
+        self.start_training.grid(row=6, column=1, padx=30, pady=10, sticky=tk.E)
         self.preview_result_button = tk.Button(self.buttonframe, text="Preview Result", command=self.preview_image, state=tk.DISABLED)
-        self.preview_result_button.grid(row=5, column=2, padx=30, pady=10, sticky=tk.E)
+        self.preview_result_button.grid(row=6, column=2, padx=30, pady=10, sticky=tk.E)
         self.plot_loss_button = tk.Button(self.buttonframe, text="Plot loss", command=self.plot_loss, state=tk.DISABLED)
-        self.plot_loss_button.grid(row=5, column=3, padx=30, pady=10, sticky=tk.E)
+        self.plot_loss_button.grid(row=6, column=3, padx=30, pady=10, sticky=tk.E)
 
         # Prediction Buttons
         self.label4 = tk.Label(self.buttonframe, text="Use trained model for prediction:")
@@ -157,7 +172,7 @@ class GUI:
         empty_image = np.zeros(image.shape)
         self.a.imshow(image, cmap='magma')
         self.canvas.draw()
-        self.b.imshow(empty_image, cmap='magma')
+        self.b.imshow(empty_image, cmap='magma', vmin=0, vmax=1)
         self.canvas.draw()
 
 
@@ -203,13 +218,13 @@ class GUI:
 
 
     def set_patch_shape(self):
-        """Sets patch shape. If 3D: (4, 256, 256), else (256, 256).
+        """Sets patch shape. If 3D: (4, train_patchsize, train_patchsize), else (train_patchsize, train_patchsize).
         Optimized for images with size 512x512"""
-
+        patch_size = int(self.train_patchsize.get())
         if self.three_D:
-            patch_shape = (4, 256, 256)
+            patch_shape = (4, patch_size, patch_size)
         else:
-            patch_shape = (256, 256)
+            patch_shape = (patch_size, patch_size)
 
         return patch_shape
 
@@ -222,19 +237,22 @@ class GUI:
         try:
             epochs = int(self.train_epochs.get())
         except ValueError:
-            tk.messagebox.showwarning(title="Wrong entry", message="Please enter a number!")
+            tk.messagebox.showwarning(title="Wrong entry", message="Please enter a number for epochs!")
             train_steps=0
             epochs=0
+
+        try:
+            train_batch_size = int(self.train_batchsize.get())
+        except ValueError:
+            tk.messagebox.showwarning(title="Wrong entry", message="Please enter a number for the batch size!")
+            train_steps=0
+            train_batch_size=0
 
         shapes = []
         for i in range(len(self.imgs)):
             shapes.append(self.imgs[i].shape[1])
-        if self.three_D:
-            train_batch_size = 8
-        else:
-            train_batch_size = 32
 
-        if epochs > 0:
+        if (epochs > 0) and (train_batch_size > 0):
             patch_shape = self.generate_patches()
             train_steps = int(self.X.shape[0]/train_batch_size)
 
