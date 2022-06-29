@@ -276,7 +276,7 @@ class GUI:
             saving_dir = self.filepath.rsplit("/", maxsplit=2)[0] + "/model_n2v/"
         except AttributeError:
             self.filepath = filedialog.askdirectory(title="Select the folder where you want to save the model.")
-            saving_dir = self.filepath.rsplit("/", maxsplit=2)[0] + "/model_n2v/"
+            saving_dir = self.filepath
         self.make_dir(saving_dir)
         logs_dir = saving_dir + "/logs/"
         self.make_dir(logs_dir)
