@@ -316,10 +316,13 @@ class GUI:
         self.configure_N2V()
         start_training = tk.messagebox.askyesno(title="Start Training", message="Once you started training, there is no way of stopping. "
                                                                                 "Please check that your parameters are correct. "
-                                                                                "Do you wish to proceed?")
+                                                                              "Do you wish to proceed?")
         if start_training:
             self.progress_text.insert(tk.END, f"\n Training...")
-            self.train_N2V()
+            try:
+                self.train_N2V()
+            except:
+                print("You might have run out of memory. Use a smaller batch size.")
         else:
             self.progress_text.insert(tk.END, f"\n Training was aborted.")
 
