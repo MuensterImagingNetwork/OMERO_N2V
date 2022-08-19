@@ -1,4 +1,6 @@
-from typing import Dict, Tuple
+#!/usr/bin/env python
+
+from typing import Dict
 from time import time
 import omero
 import omero.clients
@@ -16,7 +18,8 @@ admin = conn.getAdminService()
 graveyard_id = int(input("Enter the group ID for the inactive users:"))
 min_days = int(input("Enter the minimum amount of days a user must have been inactive:"))
 
-def find_users(conn: BlitzGateway, minimum_days: int = 0) -> Tuple[Dict[int, str], Dict[int, int]]:
+
+def find_users(conn: BlitzGateway, minimum_days: int = 0) -> Dict[int, str]:
     # Determine which users' data to consider deleting.
     # copied this code from https://github.com/ome/omero-demo-cleanup/blob/main/src/omero_demo_cleanup/library.py
 
@@ -92,6 +95,7 @@ def remove_user(user_id, graveyard_group_id, admin):
     # return the groups the user has been removed from
     return removedGroups
 
+
 # find all relevant users and print them out
 users_dict = find_users(conn, min_days)
 print(f"found these {len(users_dict)} users {users_dict}")
@@ -103,7 +107,6 @@ users = list(users_dict.keys())
 for user in users:
     removedGroups = remove_user(user, graveyard_id, admin)
     print(f"user {users_dict[user]} ({user}) removed from {len(removedGroups)} groups {removedGroups}")
-    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
 conn.close()
 
