@@ -13,6 +13,9 @@ host = str(input("Enter host IP:"))
 conn = BlitzGateway(username, password, host=host, port=4064, secure=True)
 conn.connect()
 omero.client(host)
+###############################################################
+# THE USER ACCOUNT YOU LOG IN WITH HAS TO HAVE ADMIN RIGHTS!! #
+###############################################################
 admin = conn.getAdminService()
 
 graveyard_id = int(input("Enter the group ID for the inactive users:"))
@@ -30,6 +33,7 @@ def find_users(conn: BlitzGateway, minimum_days: int = 0) -> Dict[int, str]:
     ):
         user_id = result[0].val
         user_name = result[1].val
+        # check for users you DO NOT want to touch
         if user_name not in ("Public-User", "guest", "root"):
             users[user_id] = user_name
 
