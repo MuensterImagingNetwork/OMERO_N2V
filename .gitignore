@@ -1,3 +1,10 @@
 *.pyc
 __pycache__
 config.ini
+.vs/ProjectSettings.json
+.vs/slnx.sqlite
+.vs/VSWorkspaceState.json
+.vs/OMERO/FileContentIndex/192f3172-8c35-490d-b88f-115c58af9f5f.vsidx
+.vs/OMERO/FileContentIndex/eebc53ba-8ce4-4b0a-9814-3295081bd30d.vsidx
+.vs/OMERO/FileContentIndex/read.lock
+.vs/OMERO/v17/.suo
